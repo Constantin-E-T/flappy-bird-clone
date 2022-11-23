@@ -17,11 +17,18 @@ const config = {
 }
 // loading assets, such as music, images, animations...
 function preload() {
-  debugger
+  // 'this' context - scene
+  // contains functions and properties we can use
+  this.load.image('sky', 'assets/sky.png');
 }
 // display on the screen
 function create() {
-  debugger
+  // !from line 7,8
+  // x (canvas width divided by 2)
+  // y (canvas height divided by 2)
+  // !
+  // key of the image
+  this.add.image(config.width / 2, config.height / 2, 'sky');
 }
 
 new Phaser.Game(config);
