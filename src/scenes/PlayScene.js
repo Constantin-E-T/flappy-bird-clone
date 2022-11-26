@@ -16,12 +16,16 @@ class PlayScene extends Phaser.Scene {
     this.pipeVerticalDistanceRange = [150, 250];
     this.pipeHorizontalDistanceRange = [500, 600];
     this.flapVelocity = 350;
+
+    this.score = 0;
+    this.scoreText = '';
     }
 
     preload() {
         this.load.image('sky', 'assets/sky.png');
         this.load.image('bird', 'assets/bird.png');
         this.load.image('pipe', 'assets/pipe.png');
+        this.load.image('pause', 'assets/pause.png');
     }
 
     create() {
@@ -33,6 +37,10 @@ class PlayScene extends Phaser.Scene {
         this.createPipes();
 
         this.createColliders();
+
+        this.createScore();
+
+        this.createPause();
         
         this.handleInputs(); 
     }
@@ -75,59 +83,83 @@ class PlayScene extends Phaser.Scene {
     createColliders() {
         this.physics.add.collider(this.bird, this.pipes, this.gameOver, null, this);
     }
-
+  
     handleInputs() {
         this.input.on('pointerdown', this.flap, this);
         this.input.keyboard.on('keydown_SPACE', this.flap, this);
     }
-
+    
     checkGameStatus() {
         if (this.bird.getBounds().bottom >= this.config.height || this.bird.y <= 0) {
             this.gameOver();
-          }
+        }
     }
-
     
-
+    createPause() {
+        this.add.image(this.config.width - 10, this.config.height - 10, 'pause')
+        .setScale(3)
+        .setOrigin(1);
+    }
+    
     placePipe(uPipe, lPipe) {
         const rightMostX = this.getRightMostPipe();
         const pipeVerticalDistance = Phaser.Math.Between(...this.pipeVerticalDistanceRange);
         const pipeVerticalPosition = Phaser.Math.Between(0 + 20, this.config.height - 20 - pipeVerticalDistance);
         const pipeHorizontalDistance = Phaser.Math.Between(...this.pipeHorizontalDistanceRange);
-    
+        
         uPipe.x = rightMostX + pipeHorizontalDistance;
         uPipe.y = pipeVerticalPosition;
-    
+        
         lPipe.x = uPipe.x;
         lPipe.y = uPipe.y + pipeVerticalDistance
     }
-  
+    
     recyclePipes() {
         const tempPipes = [];
         this.pipes.getChildren().forEach(pipe => {
-          if (pipe.getBounds().right <= 0) {
-            tempPipes.push(pipe);
-            if (tempPipes.length === 2) {
-              this.placePipe(...tempPipes);
+            if (pipe.getBounds().right <= 0) {
+                tempPipes.push(pipe);
+                if (tempPipes.length === 2) {
+                    this.placePipe(...tempPipes);
+                    this.increaseScore();
+                    this.saveBestScore();
+                }
             }
-          }
         })
     }
-
+    
     getRightMostPipe() {
         let rightMostX = 0;
-    
+        
         this.pipes.getChildren().forEach(function(pipe) {
-          rightMostX = Math.max(pipe.x, rightMostX);
+            rightMostX = Math.max(pipe.x, rightMostX);
         })
-    
+        
         return rightMostX;
     }
-      
+
+    saveBestScore() {
+        const bestScoreText = localStorage.getItem('bestScore');
+        const bestScore = bestScoreText && parseInt(bestScoreText, 10);
+
+        if (!bestScore || this.score > bestScore) {
+            localStorage.setItem('bestScore', this.score);
+        }
+    }
+
+    createScore() {
+        this.score = 0; 
+        const bestScore = localStorage.getItem('bestScore');
+        this.scoreText = this.add.text(16, 16, `Score: ${0}`, {fontSize: '32px', fill: '#000'});
+        this.add.text(16, 45, `Best Score: ${bestScore || 0}`, {fontSize: '18px', fill: '#000'});
+    }
+    
     gameOver() {
         this.physics.pause();
         this.bird.setTint(0xee4824);
 
+        this.saveBestScore();
+        
         this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -135,6 +167,11 @@ class PlayScene extends Phaser.Scene {
             },
             loop: false
         })
+    }
+
+    increaseScore() {
+        this.score++;
+        this.scoreText.setText(`Score: ${this.score}`)
     }
       
     flap() {
