@@ -13,6 +13,14 @@ const SHARED_CONFIG = {
   startPosition: BIRD_POSITION
 }
 
+const Scenes = [PreloadScene, MenuScene, PlayScene];
+
+const createScene = Scene => new Scene(SHARED_CONFIG)
+
+const initScenes = () => Scenes.map(createScene)
+
+
+
 
 const config = {
   // WebGL (web graphics library) JS api for rendering 2D and 3D graphics
@@ -25,7 +33,7 @@ const config = {
       debug: true,
     }
   },
-  scene: [new PreloadScene, new MenuScene(SHARED_CONFIG), new PlayScene(SHARED_CONFIG)]
+  scene: initScenes()
 }
 
 
