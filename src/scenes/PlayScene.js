@@ -15,15 +15,31 @@ class PlayScene extends BaseScene {
     this.isPause = false;
 
     this.pipeHorizontalDistance = 0;
-    this.pipeVerticalDistanceRange = [150, 250];
-    this.pipeHorizontalDistanceRange = [500, 600];
+      
     this.flapVelocity = 350;
 
     this.score = 0;
     this.scoreText = '';
+
+    this.currentDifficulty = 'easy';
+    this.difficulties = {
+        'easy': {
+            pipeVerticalDistanceRange: [350, 450],
+            pipeHorizontalDistanceRange: [700, 800],
+        },
+        'normal': {
+            pipeVerticalDistanceRange: [220, 320],
+            pipeHorizontalDistanceRange: [400, 500],
+        },
+        'hard': {
+            pipeVerticalDistanceRange: [150, 250],
+            pipeHorizontalDistanceRange: [200, 300],
+        },
     }
+}
 
     create() {
+        this.currentDifficulty = 'easy';
 
         super.create();
         
@@ -134,10 +150,11 @@ class PlayScene extends BaseScene {
     }
     
     placePipe(uPipe, lPipe) {
+        const difficulty = this.difficulties[this.currentDifficulty];
         const rightMostX = this.getRightMostPipe();
-        const pipeVerticalDistance = Phaser.Math.Between(...this.pipeVerticalDistanceRange);
+        const pipeVerticalDistance = Phaser.Math.Between(...difficulty.pipeVerticalDistanceRange);
         const pipeVerticalPosition = Phaser.Math.Between(0 + 20, this.config.height - 20 - pipeVerticalDistance);
-        const pipeHorizontalDistance = Phaser.Math.Between(...this.pipeHorizontalDistanceRange);
+        const pipeHorizontalDistance = Phaser.Math.Between(...difficulty.pipeHorizontalDistanceRange);
         
         uPipe.x = rightMostX + pipeHorizontalDistance;
         uPipe.y = pipeVerticalPosition;
@@ -155,9 +172,19 @@ class PlayScene extends BaseScene {
                     this.placePipe(...tempPipes);
                     this.increaseScore();
                     this.saveBestScore();
+                    this.increaseDifficulty();
                 }
             }
         })
+    }
+
+    increaseDifficulty() {
+        if (this.score === 5) {
+            this.currentDifficulty = 'normal';
+        }
+        if (this.score === 10) {
+            this.currentDifficulty = 'hard';
+        }
     }
     
     getRightMostPipe() {
