@@ -7,7 +7,7 @@ import PauseScene from './scenes/PauseScene';
 
 // getContext('2d', { willReadFrequently: true });
 
-const WIDTH = 400;
+const WIDTH = 800;
 const HEIGHT = 600;
 const BIRD_POSITION = {x: WIDTH * 0.1, y: HEIGHT / 2};
 
